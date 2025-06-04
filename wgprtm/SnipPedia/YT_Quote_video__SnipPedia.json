@@ -1,0 +1,1482 @@
+{
+  "name": "YT Quote video, SnipPedia",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1080,
+        -540
+      ],
+      "id": "4cc4b261-5fbf-4ebd-b630-d0fa076b7ef4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "video_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -720,
+        -540
+      ],
+      "id": "4167f7fa-908d-4480-a914-ba789bbcc0e6",
+      "name": "Get YT video",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -540
+      ],
+      "id": "b12d6573-f36f-4a57-b121-41b244743a91",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0775caa8-7ccc-412e-ae22-6dd39048c1f7",
+              "name": "filename",
+              "value": "={{ Array.from({ length: 10}, () => Math.random().toString(36)[2]).join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "198101f4-9508-42e6-931b-0f6e26a3f27a",
+              "name": "foldername",
+              "value": "footage",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        -540
+      ],
+      "id": "8305f21e-f847-4c6e-82d2-53862a975e83",
+      "name": "Generate filename"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=yt-dlp --remux-video mp4 \\\n  -o \"./{{ $('Generate filename').item.json.foldername }}/{{ $('Generate filename').item.json.filename }}.mp4\" \\\n  \"{{ $('Get YT video').item.json.video_path }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -540
+      ],
+      "id": "700aa6a2-4bfa-4da2-8c1f-a3b49f3f23d7",
+      "name": "Download video footage"
+    },
+    {
+      "parameters": {
+        "command": "mkdir -p ./footage"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -540
+      ],
+      "id": "6a6f83e9-8e59-44c1-bb95-bb7ce7700c51",
+      "name": "Create dirs"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "video_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get YT video').item.json.row_number }}",
+            "internal_path": "=./{{ $('Generate filename').item.json.foldername }}/{{ $('Generate filename').item.json.filename }}.mp4",
+            "status": "Success"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "video_path",
+              "displayName": "video_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "internal_path",
+              "displayName": "internal_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        20,
+        -540
+      ],
+      "id": "12fad367-180e-4755-8f25-85687460a380",
+      "name": "Update video footage detail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1080,
+        -220
+      ],
+      "id": "7d644248-dee9-4eb7-94da-9e45039380c9",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -220
+      ],
+      "id": "9c8feed9-8c51-483c-b65d-d4023e5de385",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {
+        "command": "mkdir -p ./footage"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -220
+      ],
+      "id": "dce75332-6069-4e69-ad76-05735c97ca16",
+      "name": "Create dirs1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 132379091,
+          "mode": "list",
+          "cachedResultName": "music_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=132379091"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -720,
+        -220
+      ],
+      "id": "e8b98293-9cec-4b0e-a73b-cd21e18639f2",
+      "name": "Get YT music",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0775caa8-7ccc-412e-ae22-6dd39048c1f7",
+              "name": "filename",
+              "value": "={{ Array.from({ length: 10}, () => Math.random().toString(36)[2]).join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "198101f4-9508-42e6-931b-0f6e26a3f27a",
+              "name": "foldername",
+              "value": "footage",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        -220
+      ],
+      "id": "846b975c-049c-4fe1-993c-90f3cc305b79",
+      "name": "Generate filename1"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=yt-dlp -x --audio-format mp3 -o \"./{{ $('Generate filename1').item.json.foldername }}/{{ $('Generate filename1').item.json.filename }}.mp3\" \"{{ $('Get YT music').item.json.music_path }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -220
+      ],
+      "id": "3cfa8c0a-8a7f-4216-873e-0ec21899b76c",
+      "name": "Download music footage"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 132379091,
+          "mode": "list",
+          "cachedResultName": "music_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=132379091"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get YT music').item.json.row_number }}",
+            "internal_path": "=./{{ $('Generate filename1').item.json.foldername }}/{{ $('Generate filename1').item.json.filename }}.mp3",
+            "status": "Success"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "music_path",
+              "displayName": "music_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "internal_path",
+              "displayName": "internal_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        20,
+        -220
+      ],
+      "id": "d9785a12-4197-4bf5-a7bd-7fd8e178db9b",
+      "name": "Update music footage detail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Download Video Pool",
+        "height": 300,
+        "width": 1400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        -640
+      ],
+      "id": "101f8803-60fe-4a47-8489-f9cb7386c199",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Download Music Pool",
+        "height": 300,
+        "width": 1400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        -320
+      ],
+      "id": "a2649f49-005f-46ba-93c4-8e0ade0f1e13",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 11 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "=0 13 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 15 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 17 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 19 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 21 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 23 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1060,
+        160
+      ],
+      "id": "87f9844b-f1aa-4fa1-bcc1-3c097b344e31",
+      "name": "Schedule Trigger2"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "internal_path"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        160
+      ],
+      "id": "714137b1-044e-419a-ab8a-29ec32a94bf2",
+      "name": "Aggregate Video"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "video_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Success"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -880,
+        160
+      ],
+      "id": "1db92137-a9c9-4ba6-84cf-793125fcbe2c",
+      "name": "Get Video Footage",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 132379091,
+          "mode": "list",
+          "cachedResultName": "music_pool",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=132379091"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Success"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -520,
+        160
+      ],
+      "id": "452f2bd4-b5cd-44a8-ade9-174bfb4f9214",
+      "name": "Get music footage",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "internal_path"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        160
+      ],
+      "id": "736aa71a-4485-43f6-bf1a-6703eb1688ba",
+      "name": "Aggregate music"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 530228491,
+          "mode": "list",
+          "cachedResultName": "quotes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=530228491"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -200,
+        160
+      ],
+      "id": "c5e5afbb-c2f1-4143-8061-46a6ce34f274",
+      "name": "Get Quote",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const fontColor = \"white\";\nconst fontFile = \"NotoSerif_Condensed-BlackItalic.ttf\";\nconst fontSize = 80;\nconst lineHighMultiplier = 1.1;\nconst videoWidth = 1080;\n\n// Estimate average character width\nconst avgCharWidth = fontSize * 0.6;\nconst maxCharsPerLine = Math.floor(videoWidth / avgCharWidth);\n\n// Get the quote and split into words\nconst quote = $(\"Get Quote\").item.json.quote;\nconst words = quote.split(\" \");\n\n// Word-wrapping logic\nconst lines = [];\nlet currentLine = \"\";\nlet currentCharCount = 0;\n\nwords.forEach((word) => {\n  const wordLength = word.length;\n  const potentialLength = currentCharCount + (currentLine ? 1 : 0) + wordLength;\n\n  if (potentialLength <= maxCharsPerLine) {\n    currentLine += `${currentLine ? \" \" : \"\"}${word}`;\n    currentCharCount = potentialLength;\n  } else {\n    lines.push(currentLine);\n    currentLine = word;\n    currentCharCount = wordLength;\n  }\n});\n\nif (currentLine) lines.push(currentLine);\n\n// Calculate total height of text block\nconst totalHeight = lines.length * fontSize * lineHighMultiplier;\nconst lineHeight = fontSize * lineHighMultiplier;\n\n// Generate drawtext filters\nconst drawText = lines\n  .map((line, index) => {\n    // Escape single quotes for FFmpeg\n    const safeLine = line.replace(/'/g, \"\\\\'\");\n    const y = `(h/2)-${Math.ceil(totalHeight / 2)}+${index * lineHeight}`;\n    return `drawtext=text='${safeLine}':fontsize=${fontSize}:fontcolor=${fontColor}:x=(w-tw)/2:y=${y}:fontfile=${fontFile}`;\n  })\n  .join(\",\");\n\nreturn {\n  json: {\n    drawText,\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        400
+      ],
+      "id": "cb88d2f2-1476-419b-be04-27caf44b0409",
+      "name": "Generate text overlay for Video"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg \\\n  -i \"{{$('Get video, music in random & narration').item.json.video_path}}\" \\\n  -i \"{{$('Get video, music in random & narration').item.json.music_path}}\" \\\n  -i \"{{$('Get video, music in random & narration').item.json.narration_path}}\" \\\n  -filter_complex \"\\\n    [0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[vid];\\\n    color=black@0.3:size=1080x1920:d=10[bg];\\\n    [vid][bg]overlay[bgvid];\\\n    [bgvid]{{ $('Generate text overlay for Video').item.json.drawText }}[outv];\\\n    [1:a]volume=0.3[a_bg];\\\n    [2:a]volume=1[a_narration];\\\n    [a_bg][a_narration]amix=inputs=2:duration=first[aout]\\\n  \" \\\n  -map \"[outv]\" \\\n  -map \"[aout]\" \\\n  -t 10 \\\n  -aspect 9:16 \\\n  -c:v libx264 \\\n  -c:a aac \\\n  -shortest \\\n  \"./{{$('Generate YT video filename').item.json.filename}}.mp4\" \\\n  -y\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        400
+      ],
+      "id": "56470a07-cfe2-4804-997a-faf9aa0264df",
+      "name": "Generate Video"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/upload/youtube/v3/videos?part=snippet,status&uploadType=resumable",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "RAW/JSON",
+        "body": "={\n  \"snippet\": {\n    \"title\": \"{{ $('Limit take 1 quote').item.json.title }}\",\n    \"description\": \"{{ $('Limit take 1 quote').item.json.quote }}\",\n    \"defaultLanguage\": \"en\",\n    \"defaultAudioLanguage\": \"en\"\n  },\n  \"status\": {\n    \"privacyStatus\": \"public\",\n    \"license\": \"youtube\",\n    \"embeddable\": true,\n    \"publicStatsViewable\": true,\n    \"madeForKids\": false\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -180,
+        720
+      ],
+      "id": "25f641c3-b18b-4cd1-86d9-d2b8755cec0e",
+      "name": "Create YT link",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "DbDceUn3nOPIKMlS",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "=./{{ $('Generate YT video filename').item.json.filename }}.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        0,
+        720
+      ],
+      "id": "26d21afd-4ce0-4738-9b10-504add4da051",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Create YT link').item.json.headers.location }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        720
+      ],
+      "id": "52e812f7-314b-4ff7-b68a-9f2d0abe8e50",
+      "name": "Upload video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "DbDceUn3nOPIKMlS",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA",
+          "mode": "list",
+          "cachedResultName": "n8n automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 530228491,
+          "mode": "list",
+          "cachedResultName": "quotes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GlXZsj1__n7CCRkaQcQJU1CR_EUNPpuP9FOOdK6amMA/edit#gid=530228491"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Limit take 1 quote').item.json.row_number }}",
+            "output_path": "=./{{ $('Generate YT video filename').item.json.filename }}.mp4",
+            "status": "Success",
+            "youtube_link": "=https://www.youtube.com/watch?v={{ $json.id }}",
+            "post_time": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quote",
+              "displayName": "quote",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output_path",
+              "displayName": "output_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "youtube_link",
+              "displayName": "youtube_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_time",
+              "displayName": "post_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        360,
+        720
+      ],
+      "id": "92866e75-e48b-4228-9d0e-bb03099a5e96",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hfv6RqIIWPQwumSB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Generate Video",
+        "height": 560,
+        "width": 2140,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        60
+      ],
+      "id": "92798aab-1c2c-4602-a754-2feca74caa34",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        160
+      ],
+      "id": "422a3b15-baaa-4b63-95b7-501cbb2cc5c8",
+      "name": "Limit take 1 quote"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d33fe040-7211-4d1c-a21f-1f52c52f3963",
+              "name": "filename",
+              "value": "={{ Array.from({ length:10 }, () => Math.random().toString(36)[2]).join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "ae6d5f1c-0ca1-41ac-b7fb-138ca6d10116",
+              "name": "foldername",
+              "value": "footage",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        160
+      ],
+      "id": "9c68383c-acb4-4133-9299-5f8556294a5f",
+      "name": "Generate narration audio filename"
+    },
+    {
+      "parameters": {
+        "command": "=curl -A \"Mozilla/5.0\" -o ./{{ $('Generate narration audio filename').item.json.foldername }}/{{ $('Generate narration audio filename').item.json.filename }}.wav \"https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q={{ $json.encodedQuote }}&tl=en\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        680,
+        160
+      ],
+      "id": "329e3aa3-07f3-4223-9d10-97d265e083df",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "mkdir -p ./footage"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        140,
+        160
+      ],
+      "id": "83731690-ef07-4b9c-a391-5645e7b5a0b0",
+      "name": "Create dirs2"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=rm ./{{ $('Generate YT video filename').item.json.filename }}.mp4"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        540,
+        720
+      ],
+      "id": "60f28520-dcfd-4e23-9cc1-6ef3a8f3f7c0",
+      "name": "Remove YT video file"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=rm ./{{ $('Generate narration audio filename').item.json.foldername }}/{{ $('Generate narration audio filename').item.json.filename }}.wav"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        720
+      ],
+      "id": "5170b3b6-cb3b-47c9-8b0e-26f0a6d3d5b6",
+      "name": "Remove Narration audio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c0b7bad-e12a-4023-9465-0fb407aea8a0",
+              "name": "music_path",
+              "value": "={{ $('Aggregate music').item.json.internal_path[Math.floor(Math.random() * $('Aggregate music').item.json.internal_path.length)] }}",
+              "type": "string"
+            },
+            {
+              "id": "4cbe133e-1938-41b9-a071-b795764c00d5",
+              "name": "video_path",
+              "value": "={{ $('Aggregate Video').item.json.internal_path[Math.floor(Math.random() * $('Aggregate Video').item.json.internal_path.length)] }}",
+              "type": "string"
+            },
+            {
+              "id": "50bf5624-3801-4c31-b4b3-77b4292dd89a",
+              "name": "narration_path",
+              "value": "=./{{ $('Generate narration audio filename').item.json.foldername }}/{{ $('Generate narration audio filename').item.json.filename }}.wav",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        840,
+        160
+      ],
+      "id": "c3c25fe9-c70b-4f79-b2ac-6c7a93e91a22",
+      "name": "Get video, music in random & narration"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5a3e2fa6-72e3-4fea-a5c6-0410dcbc7599",
+              "name": "filename",
+              "value": "={{ Array.from({ length:10 }, () => Math.random().toString(36)[2]).join('') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1060,
+        400
+      ],
+      "id": "2c6d8422-edeb-4025-b382-eb869f1aa3f0",
+      "name": "Generate YT video filename"
+    },
+    {
+      "parameters": {
+        "content": "# Upload to Youtube & Remove file",
+        "height": 300,
+        "width": 1340,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        620
+      ],
+      "id": "9189c8bf-e6d6-433f-87c1-f9f89f4cdf17",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=./{{ $('Generate YT video filename').item.json.filename }}.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        400
+      ],
+      "id": "868d70a4-0fdb-47f8-ba7a-526cf56fa6d7",
+      "name": "Read to View Generated Video"
+    },
+    {
+      "parameters": {
+        "jsCode": "const quote = $('Limit take 1 quote').first().json.quote\n\n// URL-encode the quote\nconst encodedQuote = encodeURIComponent(quote);\n\n// Save it in output\nreturn {\n  json: {\n    encodedQuote,\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        160
+      ],
+      "id": "7118c2ad-af33-4e01-a5a0-29821152190a",
+      "name": "Encoded Quote"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create dirs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YT video": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Generate filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate filename": {
+      "main": [
+        [
+          {
+            "node": "Download video footage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create dirs": {
+      "main": [
+        [
+          {
+            "node": "Get YT video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download video footage": {
+      "main": [
+        [
+          {
+            "node": "Update video footage detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Create dirs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Generate filename1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create dirs1": {
+      "main": [
+        [
+          {
+            "node": "Get YT music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YT music": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate filename1": {
+      "main": [
+        [
+          {
+            "node": "Download music footage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download music footage": {
+      "main": [
+        [
+          {
+            "node": "Update music footage detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Get Video Footage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Footage": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Video": {
+      "main": [
+        [
+          {
+            "node": "Get music footage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get music footage": {
+      "main": [
+        [
+          {
+            "node": "Aggregate music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate music": {
+      "main": [
+        [
+          {
+            "node": "Get Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote": {
+      "main": [
+        [
+          {
+            "node": "Limit take 1 quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate text overlay for Video": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Read to View Generated Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create YT link": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Upload video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload video": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Remove YT video file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit take 1 quote": {
+      "main": [
+        [
+          {
+            "node": "Create dirs2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate narration audio filename": {
+      "main": [
+        [
+          {
+            "node": "Encoded Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Get video, music in random & narration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create dirs2": {
+      "main": [
+        [
+          {
+            "node": "Generate narration audio filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove YT video file": {
+      "main": [
+        [
+          {
+            "node": "Remove Narration audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get video, music in random & narration": {
+      "main": [
+        [
+          {
+            "node": "Generate YT video filename",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate YT video filename": {
+      "main": [
+        [
+          {
+            "node": "Generate text overlay for Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encoded Quote": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "62a14761-1980-4e1b-8a2a-04d3a99fc15c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2f2e59c8890ca85f8d5c1f625c852b1ba1daad587b794626fcb139b15cbe1dfa"
+  },
+  "id": "3tt8ERzZ4f7a7Ur8",
+  "tags": []
+}

@@ -3,7 +3,7 @@
 Quotes YT short automation
 
 tutor: https://www.youtube.com/watch?v=PeelSIEewUY
-docker container id: 68fc8bc052476a9acc50a1ea604a2efa56f00f77d5971d9081bb6562b506d83f
+docker container id: n8n
 
 
 ### Deepseek prompt
@@ -15,15 +15,15 @@ Can you generate me 100 short motivational quotes from certain figure, and also 
 ```
 
 ``` bash
-# install FFmpeg
-docker exec -it -u root 68fc8bc052476a9acc50a1ea604a2efa56f00f77d5971d9081bb6562b506d83f apk add --update python3 py3-pip gcc python3-dev musl-dev curl ffmpeg
+# install FFmpeg & gTTS
+docker exec -it -u root n8n apk add --update python3 py3-pip py3-gtts gcc python3-dev musl-dev curl ffmpeg
 
 # install yt-dlp
-docker exec -it -u root 68fc8bc052476a9acc50a1ea604a2efa56f00f77d5971d9081bb6562b506d83f apk add --update yt-dlp
+docker exec -it -u root n8n apk add --update yt-dlp
 
 # copy font
-docker cp ~/Downloads/Noto_Serif/static/NotoSerif_Condensed-BlackItalic.ttf 68fc8bc052476a9acc50a1ea604a2efa56f00f77d5971d9081bb6562b506d83f:/home/node/NotoSerif_Condensed-BlackItalic.ttf
+docker cp ~/Dev/n8n/wgprtm/assets/fonts/NotoSerif_Condensed-BlackItalic.ttf n8n:/home/node/NotoSerif_Condensed-BlackItalic.ttf
 
 # see docker files from cli
-docker exec -it 68fc8bc052476a9acc50a1ea604a2efa56f00f77d5971d9081bb6562b506d83f /bin/bash
+docker exec -it n8n /bin/sh
 ```
